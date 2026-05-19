@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import DossierMedical
-from .forms import DossierMedicalForm
 from django.utils import timezone
+from .models import DossierMedical, CompteRendu
+from .forms import DossierMedicalForm
+from rendezvous.models import RendezVous
 
 
 def check_dossier_access(user, dossier):
@@ -74,34 +75,6 @@ def ajouter_note_view(request, pk):
             messages.warning(request, "La note ne peut pas être vide.")
             
     return redirect('dossier_medical:detail', pk=pk)
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import DossierMedical, CompteRendu
-from rendezvous.models import RendezVous
-
-
-@login_required
-def dossier_detail(request, pk):
-    """Afficher le dossier médical d'un patient."""
-    dossier = get_object_or_404(DossierMedical.objects.select_related('patient__user'), pk=pk)
-    return render(request, 'dossier_medical/detail.html', {'dossier': dossier})
-
-
-@login_required
-def dossier_update(request, pk):
-    """Mettre à jour le dossier médical."""
-    from .forms import DossierMedicalForm
-    dossier = get_object_or_404(DossierMedical, pk=pk)
-    if request.method == 'POST':
-        form = DossierMedicalForm(request.POST, instance=dossier)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Dossier mis à jour.')
-            return redirect('dossier_medical:detail', pk=pk)
-    else:
-        form = DossierMedicalForm(instance=dossier)
-    return render(request, 'dossier_medical/update.html', {'form': form, 'dossier': dossier})
 
 
 @login_required
