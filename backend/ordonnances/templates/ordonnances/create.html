@@ -1,0 +1,30 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Nouvelle Ordonnance - HôpitalGS{% endblock %}
+{% block page_title %}Nouvelle Ordonnance{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-file-prescription"></i> Ordonnance pour RDV #{{ rdv.pk }}</h3></div>
+        <div style="background: var(--bg-dark); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+            <p style="font-size: 13px; color: var(--text-muted);">Patient: <strong style="color: var(--text-primary);">{{ rdv.patient }}</strong></p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Date du RDV: <strong style="color: var(--text-primary);">{{ rdv.date|date:"d/m/Y à H:i" }}</strong></p>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<small style="color: var(--danger); font-size: 12px;">{{ field.errors.0 }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Créer l'ordonnance</button>
+                <a href="{% url 'rendezvous:detail' rdv.pk %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

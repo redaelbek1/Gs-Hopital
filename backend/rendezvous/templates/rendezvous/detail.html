@@ -1,0 +1,72 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}RDV #{{ rdv.pk }} - HôpitalGS{% endblock %}
+{% block page_title %}Détail du Rendez-vous{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-calendar-check"></i> Rendez-vous #{{ rdv.pk }}</h3>
+            <span class="badge {% if rdv.statut == 'confirme' %}badge-success{% elif rdv.statut == 'en_attente' %}badge-warning{% elif rdv.statut == 'annule' %}badge-danger{% else %}badge-info{% endif %}">{{ rdv.get_statut_display }}</span>
+        </div>
+        <div style="display: grid; gap: 16px;">
+            <div>
+                <strong style="color: var(--text-muted); font-size: 12px;">PATIENT</strong>
+                <p>
+                    <a href="{% url 'patients:detail' rdv.patient.pk %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                        {{ rdv.patient }} <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                    </a>
+                </p>
+            </div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">MÉDECIN</strong><p>{{ rdv.medecin }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">DATE</strong><p>{{ rdv.date|date:"d/m/Y à H:i" }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">MOTIF</strong><p>{{ rdv.motif|default:"Non précisé" }}</p></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-cogs"></i> Actions</h3></div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% if rdv.statut == 'en_attente' %}
+                {% if user.role == 'medecin' %}
+                <a href="{% url 'rendezvous:confirmer' rdv.pk %}" class="btn btn-success"><i class="fas fa-check"></i> Confirmer</a>
+                {% endif %}
+                <a href="{% url 'rendezvous:annuler' rdv.pk %}" class="btn btn-danger"><i class="fas fa-times"></i> Annuler</a>
+            {% endif %}
+            {% if rdv.statut == 'confirme' and user.role == 'medecin' %}
+            <a href="{% url 'ordonnances:create' rdv.pk %}" class="btn btn-primary"><i class="fas fa-file-prescription"></i> Créer une ordonnance</a>
+            {% endif %}
+            {% if rdv.statut == 'annule' or rdv.statut == 'confirme' and user.role == 'patient' %}
+            <p style="color: var(--text-muted); font-size: 13px;">Aucune action disponible.</p>
+            {% endif %}
+        </div>
+        {% if rdv.ordonnances.exists %}
+        <div style="margin-top: 24px;">
+            <h4 style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">Ordonnances liées</h4>
+            {% for ordo in rdv.ordonnances.all %}
+            <a href="{% url 'ordonnances:detail' ordo.pk %}" class="btn btn-outline btn-sm" style="margin-bottom: 8px;">
+                <i class="fas fa-file-medical"></i> Ordonnance #{{ ordo.pk }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+<a href="{% url 'rendezvous:list' %}" class="btn btn-outline" style="margin-top: 24px;"><i class="fas fa-arrow-left"></i> Retour</a>
+
+{% if user.role == 'medecin' and rdv.statut == 'en_attente' %}
+<a href="{% url 'rendezvous:refuser' rdv.pk %}" class="btn btn-danger"
+   onclick="return confirm('Refuser ce rendez-vous ?')">
+   <i class="fas fa-times"></i> Refuser
+</a>
+{% endif %}
+{% if user.role == 'medecin' and rdv.statut == 'confirme' %}
+<a href="{% url 'dossier_medical:cr_create' rdv.pk %}" class="btn btn-success">
+   <i class="fas fa-file-medical"></i> Rédiger compte-rendu
+</a>
+{% endif %}
+{% if rdv.compte_rendu %}
+<a href="{% url 'dossier_medical:cr_detail' rdv.compte_rendu.pk %}" class="btn btn-outline">
+   <i class="fas fa-file-alt"></i> Voir compte-rendu
+</a>
+{% endif %}
+{% endblock %}

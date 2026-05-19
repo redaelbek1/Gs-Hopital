@@ -1,0 +1,50 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Dr. {{ medecin.user.get_full_name }} - HôpitalGS{% endblock %}
+{% block page_title %}Dr. {{ medecin.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-user-md"></i> Informations</h3>
+            {% if user.role == 'admin' %}
+            <div style="display: flex; gap: 8px;">
+                <a href="{% url 'medecins:update' medecin.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Modifier</a>
+                <a href="{% url 'medecins:delete' medecin.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Supprimer</a>
+            </div>
+            {% endif %}
+        </div>
+        <div style="display: grid; gap: 16px;">
+            <div><strong style="color: var(--text-muted); font-size: 12px;">NOM COMPLET</strong><p style="font-size: 18px; font-weight: 600;">Dr. {{ medecin.user.get_full_name }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">EMAIL</strong><p>{{ medecin.user.email }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">SPÉCIALITÉ</strong><p><span class="badge badge-info">{{ medecin.specialite }}</span></p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">SERVICE</strong><p>{% if medecin.service %}<a href="{% url 'services:detail' medecin.service.pk %}" style="color: var(--primary);">{{ medecin.service.nom }}</a>{% else %}Non assigné{% endif %}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">TÉLÉPHONE</strong><p>{{ medecin.telephone|default:"Non renseigné" }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">DISPONIBILITÉ</strong><p>{% if medecin.disponible %}<span class="badge badge-success">Disponible</span>{% else %}<span class="badge badge-danger">Indisponible</span>{% endif %}</p></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-calendar-alt"></i> Derniers rendez-vous</h3></div>
+        {% if rdvs %}
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Patient</th><th>Date</th><th>Statut</th></tr></thead>
+                <tbody>
+                {% for rdv in rdvs %}
+                <tr>
+                    <td>{{ rdv.patient }}</td>
+                    <td>{{ rdv.date|date:"d/m/Y H:i" }}</td>
+                    <td><span class="badge {% if rdv.statut == 'confirme' %}badge-success{% elif rdv.statut == 'en_attente' %}badge-warning{% else %}badge-danger{% endif %}">{{ rdv.get_statut_display }}</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-calendar-times"></i><h3>Aucun rendez-vous</h3></div>
+        {% endif %}
+    </div>
+</div>
+<a href="{% url 'medecins:list' %}" class="btn btn-outline" style="margin-top: 24px;"><i class="fas fa-arrow-left"></i> Retour</a>
+{% endblock %}

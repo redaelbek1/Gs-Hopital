@@ -1,0 +1,32 @@
+{% extends 'base_app/base.html' %}
+{% block title %}Nouveau Compte-rendu{% endblock %}
+{% block page_title %}Compte-rendu de consultation{% endblock %}
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card-header">
+    <h3><i class="fas fa-file-medical"></i> Compte-rendu — RDV #{{ rdv.id }}</h3>
+    <p style="margin:4px 0 0;color:#666;">Patient : {{ rdv.patient.user.get_full_name }} | {{ rdv.date|date:"d/m/Y H:i" }}</p>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Observations</label>
+        <textarea name="observations" class="form-control" rows="4" placeholder="Observations cliniques..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Diagnostic</label>
+        <textarea name="diagnostic" class="form-control" rows="3" placeholder="Diagnostic posé..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Recommandations</label>
+        <textarea name="recommandations" class="form-control" rows="3" placeholder="Recommandations au patient..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1rem;">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        <a href="{% url 'rendezvous:detail' rdv.id %}" class="btn btn-outline">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

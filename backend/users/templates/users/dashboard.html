@@ -1,0 +1,114 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Tableau de bord - HôpitalGS{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<!-- PATIENT DASHBOARD -->
+{% if user.role == 'patient' %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-info">
+            <h4>{{ rendezvous|length|default:"0" }}</h4>
+            <p>Rendez-vous à venir</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-file-medical"></i></div>
+        <div class="stat-info">
+            <h4>{% if dossier %}1{% else %}0{% endif %}</h4>
+            <p>Dossier médical</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-alt"></i> Prochains RDV</h3>
+            <a href="{% url 'rendezvous:create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nouveau</a>
+        </div>
+        {% if rendezvous %}
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Médecin</th><th>Date</th><th>Statut</th></tr></thead>
+                <tbody>
+                {% for rdv in rendezvous %}
+                <tr>
+                    <td>{{ rdv.medecin }}</td>
+                    <td>{{ rdv.date|date:"d/m/Y H:i" }}</td>
+                    <td><span class="badge {% if rdv.statut == 'confirme' %}badge-success{% elif rdv.statut == 'en_attente' %}badge-warning{% elif rdv.statut == 'annule' %}badge-danger{% else %}badge-info{% endif %}">{{ rdv.get_statut_display }}</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-calendar-times"></i><h3>Aucun rendez-vous</h3></div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-file-medical"></i> Mon Dossier</h3></div>
+        {% if dossier %}
+        <div style="display: grid; gap: 12px;">
+            <div><strong style="color: var(--text-muted); font-size: 12px;">GROUPE SANGUIN</strong><p>{{ dossier.groupe_sanguin|default:"—" }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">ALLERGIES</strong><p>{{ dossier.allergies|default:"Aucune" }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">ANTÉCÉDENTS</strong><p>{{ dossier.antecedents|default:"Aucun"|truncatewords:30 }}</p></div>
+            <a href="{% url 'dossier_medical:detail' dossier.pk %}" class="btn btn-outline" style="margin-top: 12px;"><i class="fas fa-eye"></i> Consulter le dossier complet</a>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-folder-open"></i><h3>Pas de dossier</h3></div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- MEDECIN DASHBOARD -->
+{% if user.role == 'medecin' %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <h4>{{ rendezvous|length|default:"0" }}</h4>
+            <p>RDV en attente</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-stethoscope"></i></div>
+        <div class="stat-info">
+            <h4>{{ medecin.specialite|default:"—" }}</h4>
+            <p>Spécialité</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3><i class="fas fa-calendar-alt"></i> RDV en attente</h3></div>
+    {% if rendezvous %}
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Patient</th><th>Date</th><th>Motif</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for rdv in rendezvous %}
+            <tr>
+                <td>{{ rdv.patient }}</td>
+                <td>{{ rdv.date|date:"d/m/Y H:i" }}</td>
+                <td>{{ rdv.motif|truncatewords:8 }}</td>
+                <td>
+                    <a href="{% url 'rendezvous:confirmer' rdv.pk %}" class="btn btn-success btn-sm"><i class="fas fa-check"></i></a>
+                    <a href="{% url 'rendezvous:annuler' rdv.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-times"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-check-circle"></i><h3>Aucun RDV en attente</h3></div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

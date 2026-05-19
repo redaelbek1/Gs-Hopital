@@ -1,0 +1,45 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Dossier Médical - HôpitalGS{% endblock %}
+{% block page_title %}Dossier Médical{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-file-medical"></i> Dossier de {{ dossier.patient }}</h3></div>
+        <div style="display: grid; gap: 16px;">
+            <div><strong style="color: var(--text-muted); font-size: 12px;">PATIENT</strong><p style="font-size: 18px; font-weight: 600;">{{ dossier.patient.user.get_full_name }}</p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">GROUPE SANGUIN</strong><p><span class="badge badge-danger">{{ dossier.groupe_sanguin|default:"Non renseigné" }}</span></p></div>
+            <div><strong style="color: var(--text-muted); font-size: 12px;">CRÉÉ LE</strong><p>{{ dossier.created_at|date:"d/m/Y à H:i" }}</p></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-notes-medical"></i> Détails médicaux</h3>
+            {% if user.role in 'medecin admin' %}
+            <a href="{% url 'dossier_medical:update' dossier.pk %}" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i> Modifier</a>
+            {% endif %}
+        </div>
+        <div style="display: grid; gap: 16px;">
+            <div><strong style="color: var(--text-muted); font-size: 12px;">ALLERGIES</strong><p>{{ dossier.allergies|default:"Aucune allergie connue"|linebreaksbr }}</p></div>
+            <div>
+                <strong style="color: var(--text-muted); font-size: 12px;">ANTÉCÉDENTS ET NOTES</strong>
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: var(--radius-sm); margin-top: 8px;">
+                    <p style="margin: 0; white-space: pre-wrap;">{{ dossier.antecedents|default:"Aucun antécédent ou note" }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if user.role in 'medecin admin' %}
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h4 style="font-size: 14px; margin-bottom: 12px;"><i class="fas fa-plus-circle"></i> Ajouter une note</h4>
+            <form action="{% url 'dossier_medical:ajouter_note' dossier.pk %}" method="post">
+                {% csrf_token %}
+                <textarea name="note" class="form-control" rows="3" placeholder="Écrivez une nouvelle note ou observation ici..." required></textarea>
+                <button type="submit" class="btn btn-primary" style="margin-top: 12px;"><i class="fas fa-save"></i> Enregistrer la note</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<a href="{% url 'patients:detail' dossier.patient.pk %}" class="btn btn-outline" style="margin-top: 24px;"><i class="fas fa-arrow-left"></i> Retour au patient</a>
+{% endblock %}

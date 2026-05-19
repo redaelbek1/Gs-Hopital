@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hôpital - Gestion{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'base/css/style.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'base/css/animations.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-hospital"></i>
+            <h2>HôpitalGS</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Principal</div>
+            <a href="{% url 'users:dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}">
+                <i class="fas fa-chart-pie"></i> Tableau de bord
+            </a>
+
+            {% if user.role == 'patient' %}
+            <div class="nav-section">Patient</div>
+            <a href="{% url 'rendezvous:list' %}" class="nav-link {% block nav_rdv %}{% endblock %}">
+                <i class="fas fa-calendar-check"></i> Mes Rendez-vous
+            </a>
+            <a href="{% url 'rendezvous:create' %}" class="nav-link {% block nav_rdv_new %}{% endblock %}">
+                <i class="fas fa-calendar-plus"></i> Nouveau RDV
+            </a>
+            <a href="{% url 'ordonnances:list' %}" class="nav-link {% block nav_ordo %}{% endblock %}">
+                <i class="fas fa-file-prescription"></i> Ordonnances
+            </a>
+            {% endif %}
+
+            {% if user.role == 'medecin' %}
+            <div class="nav-section">Médecin</div>
+            <a href="{% url 'medecins:planning' %}" class="nav-link {% block nav_planning %}{% endblock %}">
+                <i class="fas fa-calendar-alt"></i> Calendrier
+            </a>
+            <a href="{% url 'rendezvous:list' %}" class="nav-link">
+                <i class="fas fa-list"></i> Liste RDV
+            </a>
+            <a href="{% url 'patients:list' %}" class="nav-link {% block nav_patients %}{% endblock %}">
+                <i class="fas fa-users"></i> Patients
+            </a>
+            <a href="{% url 'ordonnances:list' %}" class="nav-link {% block nav_ordonnances %}{% endblock %}">
+                <i class="fas fa-prescription"></i> Ordonnances
+            </a>
+            {% endif %}
+
+            {% if user.role == 'admin' %}
+            <div class="nav-section">Administration</div>
+            <a href="{% url 'patients:list' %}" class="nav-link {% block nav_all_patients %}{% endblock %}">
+                <i class="fas fa-user-injured"></i> Patients
+            </a>
+            <a href="{% url 'medecins:list' %}" class="nav-link {% block nav_medecins %}{% endblock %}">
+                <i class="fas fa-user-md"></i> Médecins
+            </a>
+            <a href="{% url 'services:list' %}" class="nav-link {% block nav_services %}{% endblock %}">
+                <i class="fas fa-building"></i> Services
+            </a>
+            <a href="{% url 'rendezvous:list' %}" class="nav-link {% block nav_all_rdv %}{% endblock %}">
+                <i class="fas fa-calendar"></i> Rendez-vous
+            </a>
+            <a href="{% url 'administration:rapports' %}" class="nav-link">
+                <i class="fas fa-chart-bar"></i> Rapports
+            </a>
+            {% endif %}
+
+            <div class="nav-section">Compte</div>
+            <a href="{% url 'users:profile' %}" class="nav-link {% block nav_profile %}{% endblock %}">
+                <i class="fas fa-user-cog"></i> Mon Profil
+            </a>
+            <a href="{% url 'users:logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button id="menu-toggle" class="btn btn-outline" style="display: none; padding: 8px 12px;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>{% block page_title %}Tableau de bord{% endblock %}</h1>
+            </div>
+            <div class="topbar-actions">
+                <div class="user-badge">
+                    <div class="user-avatar">{{ user.prenom.0 }}{{ user.nom.0 }}</div>
+                    <span>{{ user.get_full_name }}</span>
+                    <span class="badge badge-primary">{{ user.get_role_display }}</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-content fade-in">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    {% else %}
+    <main>
+        {% for message in messages %}
+        <div style="max-width: 500px; margin: 20px auto; padding: 0 20px;">
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fas fa-info-circle"></i>
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+        {% block auth_content %}{% endblock %}
+    </main>
+    {% endif %}
+
+    <script src="{% static 'base/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

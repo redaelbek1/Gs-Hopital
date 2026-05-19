@@ -1,0 +1,27 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Nouveau RDV - HôpitalGS{% endblock %}
+{% block nav_rdv_new %}active{% endblock %}
+{% block page_title %}Nouveau Rendez-vous{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px;">
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-calendar-plus"></i> Prendre un rendez-vous</h3></div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<small style="color: var(--danger); font-size: 12px;">{{ field.errors.0 }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Confirmer</button>
+                <a href="{% url 'rendezvous:list' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

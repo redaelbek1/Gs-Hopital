@@ -1,0 +1,37 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Ordonnances - HôpitalGS{% endblock %}
+{% block nav_ordo %}active{% endblock %}
+{% block nav_ordonnances %}active{% endblock %}
+{% block page_title %}Ordonnances{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-file-prescription"></i> Ordonnances ({{ ordonnances|length }})</h3>
+    </div>
+    {% if ordonnances %}
+    <div class="table-container">
+        <table>
+            <thead><tr><th>#</th><th>Médecin</th><th>Patient</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for ordo in ordonnances %}
+            <tr>
+                <td><span class="badge badge-primary">#{{ ordo.pk }}</span></td>
+                <td>Dr. {{ ordo.medecin.user.get_full_name }}</td>
+                <td>{{ ordo.rdv.patient }}</td>
+                <td>{{ ordo.date|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'ordonnances:detail' ordo.pk %}" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i></a>
+                    <a href="{% url 'ordonnances:pdf' ordo.pk %}" class="btn btn-outline btn-sm"><i class="fas fa-download"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-file-prescription"></i><h3>Aucune ordonnance</h3></div>
+    {% endif %}
+</div>
+{% endblock %}

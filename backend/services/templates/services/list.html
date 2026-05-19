@@ -1,0 +1,49 @@
+{% extends 'base_app/base.html' %}
+
+{% block title %}Services - HôpitalGS{% endblock %}
+{% block nav_services %}active{% endblock %}
+{% block page_title %}Services Hospitaliers{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <h3><i class="fas fa-building"></i> Services ({{ services|length }})</h3>
+        {% if user.role == 'admin' %}
+        <a href="{% url 'services:create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nouveau Service</a>
+        {% endif %}
+    </div>
+</div>
+<div class="stats-grid">
+    {% for service in services %}
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+            <div class="stat-icon blue"><i class="fas fa-building"></i></div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 600;">{{ service.nom }}</h3>
+                <p style="color: var(--text-secondary); font-size: 13px;">
+                    {% if service.description %}{{ service.description|truncatewords:12 }}{% else %}Pas de description{% endif %}
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+            <span style="color: var(--text-muted); font-size: 13px;">
+                <i class="fas fa-user-md"></i> Chef:
+                {% if service.chef_service %}{{ service.chef_service.user.get_full_name }}{% else %}Non assigné{% endif %}
+            </span>
+            <span class="badge badge-info">{{ service.medecins.count }} médecin{{ service.medecins.count|pluralize }}</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <a href="{% url 'services:detail' service.pk %}" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> Détail</a>
+            {% if user.role == 'admin' %}
+            <a href="{% url 'services:update' service.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'services:delete' service.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="card">
+        <div class="empty-state"><i class="fas fa-building"></i><h3>Aucun service</h3></div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

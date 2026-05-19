@@ -1,0 +1,26 @@
+{% extends 'base_app/base.html' %}
+{% block title %}Compte-rendu{% endblock %}
+{% block page_title %}Compte-rendu de consultation{% endblock %}
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card-header">
+    <h3><i class="fas fa-file-medical"></i> Compte-rendu #{{ cr.id }}</h3>
+    <p style="color:#666;">Dr {{ cr.medecin.user.get_full_name }} | {{ cr.date|date:"d/m/Y" }}</p>
+  </div>
+  <div class="card-body">
+    {% if cr.observations %}
+    <h4>Observations</h4>
+    <p>{{ cr.observations|linebreaksbr }}</p>
+    {% endif %}
+    {% if cr.diagnostic %}
+    <h4>Diagnostic</h4>
+    <p>{{ cr.diagnostic|linebreaksbr }}</p>
+    {% endif %}
+    {% if cr.recommandations %}
+    <h4>Recommandations</h4>
+    <p>{{ cr.recommandations|linebreaksbr }}</p>
+    {% endif %}
+    <a href="{% url 'rendezvous:detail' cr.rendezvous.id %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour RDV</a>
+  </div>
+</div>
+{% endblock %}

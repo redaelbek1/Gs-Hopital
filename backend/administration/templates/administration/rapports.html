@@ -1,0 +1,100 @@
+{% extends 'base_app/base.html' %}
+{% block title %}Rapports{% endblock %}
+{% block page_title %}Rapports & Statistiques{% endblock %}
+{% block extra_css %}
+<style>
+  .stat-card { background:white; border-radius:12px; padding:1.5rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  .stat-card .num { font-size:2.2rem; font-weight:700; color:#1a73e8; }
+  .stat-card .label { color:#666; font-size:0.9rem; margin-top:4px; }
+  .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem; }
+  .chart-card { background:white; border-radius:12px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+  .chart-card h4 { margin:0 0 1rem; color:#333; font-size:1rem; }
+  @media(max-width:768px){ .charts-grid{ grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+  <div class="stat-card">
+    <div class="num">{{ total_consultations }}</div>
+    <div class="label">Consultations totales</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" style="font-size:1.3rem;">{{ service_top }}</div>
+    <div class="label">Service le plus actif</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" style="font-size:1.2rem;">{{ medecin_top }}</div>
+    <div class="label">Médecin le plus actif</div>
+  </div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-card" style="grid-column:1/-1;">
+    <h4><i class="fas fa-chart-line"></i> Consultations par mois</h4>
+    <canvas id="chartMois" height="80"></canvas>
+  </div>
+  <div class="chart-card">
+    <h4><i class="fas fa-building"></i> Services les plus actifs</h4>
+    <canvas id="chartServices" height="200"></canvas>
+  </div>
+  <div class="chart-card">
+    <h4><i class="fas fa-user-md"></i> Médecins les plus actifs</h4>
+    <canvas id="chartMedecins" height="200"></canvas>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labelsMois = {{ labels_mois|safe }};
+const dataMois = {{ data_mois|safe }};
+const labelsServices = {{ labels_services|safe }};
+const dataServices = {{ data_services|safe }};
+const labelsMedecins = {{ labels_medecins|safe }};
+const dataMedecins = {{ data_medecins|safe }};
+
+new Chart(document.getElementById('chartMois'), {
+  type: 'line',
+  data: {
+    labels: labelsMois,
+    datasets: [{
+      label: 'Consultations',
+      data: dataMois,
+      borderColor: '#1a73e8',
+      backgroundColor: 'rgba(26,115,232,0.1)',
+      tension: 0.4,
+      fill: true,
+    }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('chartServices'), {
+  type: 'bar',
+  data: {
+    labels: labelsServices,
+    datasets: [{
+      label: 'RDV',
+      data: dataServices,
+      backgroundColor: 'rgba(26,115,232,0.7)',
+      borderRadius: 6,
+    }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, indexAxis: 'y' }
+});
+
+new Chart(document.getElementById('chartMedecins'), {
+  type: 'bar',
+  data: {
+    labels: labelsMedecins,
+    datasets: [{
+      label: 'Consultations',
+      data: dataMedecins,
+      backgroundColor: 'rgba(40,167,69,0.7)',
+      borderRadius: 6,
+    }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, indexAxis: 'y' }
+});
+</script>
+{% endblock %}
